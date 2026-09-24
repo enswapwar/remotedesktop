@@ -4,28 +4,73 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
 
+const devices = new Map();
+
 io.on("connection", socket => {
     console.log("Connected:", socket.id);
 
     socket.on("register", data => {
-        if (!data || !data.id) return;
+        if (!data || !data.id || !data.type) {
+            socket.emit("error-message", {
+                message: "Invalid registration"
+            });
+            return;
+        }
 
-        socket.join(data.id);
+        const id = String(data.id);
+        const type = String(data.type);
 
-        socket.data.deviceId = data.id;
-        socket.data.type = data.type || "unknown";
+        socket.data.deviceId = id;
+        socket.data.type = type;
 
-        console.log("Registered:", data.id, socket.data.type);
+        devices.set(id, {
+            socketId: socket.id,
+            type,
+            id
+        });
+
+        socket.join(id);
+
+        console.log(`Registered: ${id} (${type})`);
 
         socket.emit("registered", {
-            id: data.id
+            id,
+            type
         });
+    });
+
+    socket.on("request-connection", data => {
+        if (!data || !data.target) return;
+
+        const target = devices.get(String(data.target));
+
+        if (!target) {
+            socket.emit("connection-error", {
+                message: "PC not found"
+            });
+            return;
+        }
+
+        io.to(target.socketId).emit("connection-request", {
+            from: socket.id,
+            browserId: socket.data.deviceId || null
+        });
+
+        console.log(
+            `Connection request: ${socket.data.deviceId || socket.id} -> ${data.target}`
+        );
     });
 
     socket.on("offer", data => {
@@ -56,10 +101,35 @@ io.on("connection", socket => {
     });
 
     socket.on("disconnect", reason => {
-        console.log("Disconnected:", socket.id, reason);
+        const id = socket.data.deviceId;
+
+        if (id) {
+            const device = devices.get(id);
+
+            if (device && device.socketId === socket.id) {
+                devices.delete(id);
+            }
+
+            console.log(`Unregistered: ${id}`);
+        }
+
+        console.log(`Disconnected: ${socket.id} (${reason})`);
     });
 });
 
+app.get("/api/devices", (req, res) => {
+    const result = [];
+
+    for (const device of devices.values()) {
+        result.push({
+            id: device.id,
+            type: device.type
+        });
+    }
+
+    res.json(result);
+});
+
 server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server listening on port ${PORT}`);
+    console.log(`Remote PC server listening on port ${PORT}`);
 });
