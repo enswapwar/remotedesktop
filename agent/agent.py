@@ -16,7 +16,7 @@ from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
 
 SERVER_URL = os.environ.get(
     "REMOTE_SERVER_URL",
-    "https://YOUR-APP.onrender.com"
+    "https://remotedesktop-yvgh.onrender.com/"
 )
 
 DEVICE_ID_FILE = "agent_id.txt"
