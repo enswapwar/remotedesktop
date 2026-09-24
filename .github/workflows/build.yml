@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: windows-latest
 
+    defaults:
+      run:
+        working-directory: agent
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,4 +36,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: remote-agent-windows
-          path: dist/remote-agent.exe
+          path: agent/dist/remote-agent.exe
