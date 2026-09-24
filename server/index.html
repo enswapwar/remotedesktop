@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote PC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Remote PC</h1>
+
+        <div class="connect-box">
+            <input id="pcId" type="text" placeholder="PC ID">
+            <button id="connect">接続</button>
+        </div>
+
+        <div id="status">未接続</div>
+
+        <div id="screen-container">
+            <video id="screen" autoplay playsinline></video>
+            <div id="no-screen">画面未接続</div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>
