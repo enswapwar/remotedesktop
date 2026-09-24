@@ -1,0 +1,9 @@
+aiortc
+av
+mss
+numpy
+psutil
+pyautogui
+python-socketio[client]
+aiohttp
+pyinstaller
