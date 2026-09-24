@@ -8,9 +8,7 @@ const io = new Server(server);
 
 const PORT = process.env.PORT || 3000;
 
-app.get("/", (req, res) => {
-    res.send("Remote PC signaling server");
-});
+app.use(express.static("public"));
 
 io.on("connection", socket => {
     console.log("Connected:", socket.id);
